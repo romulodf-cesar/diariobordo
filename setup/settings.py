@@ -19,8 +19,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
+    #'django.contrib.admin',
+    #'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -66,8 +66,17 @@ WSGI_APPLICATION = 'setup.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'diariotecnico', # O nome do banco de dados MySQL que você criou
+        'USER': 'root',    # Seu usuário MySQL
+        'PASSWORD': '',  # Sua senha MySQL
+        'HOST': 'localhost',        # Ou o IP/nome do host onde o MySQL está rodando
+        'PORT': '3306',             # A porta do MySQL (3306 é a padrão)
+        # Outras opções podem ser adicionadas em 'OPTIONS' se necessário
+        # ... outras configurações ...
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        }
     }
 }
 

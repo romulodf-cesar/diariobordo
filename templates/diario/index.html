@@ -1,11 +1,656 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Logbook</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --p:#006064;--pl:#00838f;--pd:#00474a;
+  --ac:#FF7043;--ad:#e64a19;--at:#C5B358;
+  --sur:#EEF5F5;--card:#fff;--txt:#263238;--mu:#607D8B;
+  --bdr:#cde4e5;--tp:#dff2f3;--ta:#fde8e2;
+  --fd:'Playfair Display',serif;--fb:'DM Sans',sans-serif;
+  --s1:0 1px 6px rgba(0,96,100,.09);
+  --s2:0 4px 18px rgba(0,96,100,.13);
+  --s3:0 8px 32px rgba(0,96,100,.18);
+  --r1:10px;--r2:16px;--r3:22px;
+  --sw:256px;--th:62px;--bnh:66px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--sur);color:var(--txt);min-height:100vh}
+h1,h2,h3,.sf{font-family:var(--fd)}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:5px;height:4px}
+::-webkit-scrollbar-thumb{background:var(--pl);border-radius:4px}
+
+/* ── SIDEBAR ─────────────────────────── */
+.lb-sb{position:fixed;top:0;left:0;width:var(--sw);height:100vh;
+  background:var(--pd);display:flex;flex-direction:column;
+  z-index:1040;transition:transform .3s cubic-bezier(.4,0,.2,1);overflow-y:auto}
+.lb-sb__brand{padding:24px 20px 18px;border-bottom:1px solid rgba(255,255,255,.1);
+  display:flex;align-items:center;gap:11px}
+.lb-sb__logo{width:36px;height:36px;background:var(--pl);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.lb-sb__name{font-family:var(--fd);font-size:1.5rem;font-weight:700;color:#fff;line-height:1}
+.lb-sb__nav{flex:1;padding:14px 0}
+.lb-sb__lbl{font-size:.65rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:rgba(255,255,255,.3);padding:0 20px;margin:14px 0 5px}
+.nb{display:flex;align-items:center;gap:10px;padding:10px 20px;
+  border-radius:0 28px 28px 0;margin-right:12px;font-size:.88rem;font-weight:500;
+  color:rgba(255,255,255,.6);transition:all .18s;cursor:pointer}
+.nb i{font-size:1.1rem;flex-shrink:0}
+.nb:hover{color:#fff;background:rgba(255,255,255,.1)}
+.nb.on{color:#fff;background:var(--pl);box-shadow:0 3px 12px rgba(0,131,143,.3)}
+.nb .dot{width:7px;height:7px;border-radius:50%;background:var(--ac);margin-left:auto;flex-shrink:0}
+.lb-sb__ft{padding:14px 20px;border-top:1px solid rgba(255,255,255,.1);
+  display:flex;align-items:center;gap:10px}
+.av{width:36px;height:36px;border-radius:50%;background:var(--ac);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;color:#fff;font-size:.8rem;flex-shrink:0;
+  border:2px solid rgba(255,255,255,.2)}
+.av-lg{width:74px;height:74px;font-size:1.5rem;border-width:3px;
+  box-shadow:0 4px 16px rgba(0,0,0,.2);margin:0 auto 12px}
+
+/* ── OVERLAY ─────────────────────────── */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.42);
+  z-index:1039;backdrop-filter:blur(2px)}
+.ov.on{display:block}
+
+/* ── TOPBAR ──────────────────────────── */
+.tb{position:sticky;top:0;height:var(--th);background:var(--card);
+  border-bottom:1px solid var(--bdr);display:flex;align-items:center;
+  padding:0 18px;gap:12px;z-index:1030}
+.tb__brand{font-family:var(--fd);font-size:1.3rem;font-weight:700;
+  color:var(--p);display:none;align-items:center;gap:8px}
+.tb__srch{flex:1;max-width:360px;position:relative}
+.tb__srch input{width:100%;background:var(--sur);border:1.5px solid transparent;
+  border-radius:99px;padding:8px 16px 8px 40px;font-size:.83rem;
+  font-family:var(--fb);color:var(--txt);outline:none;
+  transition:border-color .18s,box-shadow .18s}
+.tb__srch input:focus{border-color:var(--pl);box-shadow:0 0 0 3px rgba(0,131,143,.15)}
+.tb__srch i{position:absolute;left:13px;top:50%;transform:translateY(-50%);
+  color:var(--mu);font-size:.9rem}
+.sp{flex:1}
+.ib{width:38px;height:38px;border-radius:50%;background:var(--sur);
+  border:none;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--txt);font-size:1.05rem;position:relative;
+  transition:background .18s;flex-shrink:0}
+.ib:hover{background:var(--bdr)}
+.ndot{position:absolute;top:7px;right:7px;width:8px;height:8px;
+  border-radius:50%;background:var(--ac);border:2px solid var(--card)}
+
+/* ── LAYOUT ──────────────────────────── */
+.main{margin-left:var(--sw);min-height:100vh;padding-bottom:40px}
+.pg{max-width:880px;margin:0 auto;padding:26px 22px}
+
+/* ── BOTTOM NAV ──────────────────────── */
+.bn{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--bnh);
+  background:var(--card);border-top:1px solid var(--bdr);z-index:1030}
+.bni{flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:2px;font-size:.62rem;font-weight:500;
+  color:var(--mu);cursor:pointer;transition:color .18s;text-decoration:none}
+.bni i{font-size:1.3rem}
+.bni.on{color:var(--p)}
+
+/* ── FAB ─────────────────────────────── */
+.fab{position:fixed;bottom:82px;right:18px;width:52px;height:52px;
+  border-radius:50%;background:var(--ac);color:#fff;border:none;
+  font-size:1.5rem;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 20px rgba(255,112,67,.45);cursor:pointer;z-index:1035;
+  transition:all .18s}
+.fab:hover{background:var(--ad);transform:scale(1.08)}
+
+/* ── STREAK CARD ─────────────────────── */
+.stk{background:linear-gradient(135deg,var(--pd) 0%,var(--p) 55%,var(--pl) 100%);
+  border-radius:var(--r2);padding:20px 22px;color:#fff;position:relative;overflow:hidden;margin-bottom:14px}
+.stk::after{content:'🔥';position:absolute;right:18px;top:50%;
+  transform:translateY(-50%);font-size:3.2rem;opacity:.22;pointer-events:none}
+.stk__lbl{font-size:.78rem;opacity:.72;margin-bottom:3px}
+.stk__ttl{font-size:1.05rem;font-weight:600}
+.stk__trk{height:8px;border-radius:99px;background:rgba(255,255,255,.25);margin-top:12px;overflow:hidden}
+.stk__fill{height:100%;border-radius:99px;background:#fff;width:0;
+  transition:width 1.2s cubic-bezier(.34,1.56,.64,1)}
+.stk__meta{font-size:.76rem;opacity:.68;margin-top:6px}
+
+/* ── STAT CARD ───────────────────────── */
+.sc{background:var(--card);border-radius:var(--r2);padding:14px 10px;
+  box-shadow:var(--s1);text-align:center}
+.sc__v{font-family:var(--fd);font-size:1.8rem;font-weight:700;color:var(--p);line-height:1}
+.sc__l{font-size:.73rem;color:var(--mu);margin-top:4px}
+
+/* ── SECTION HEADER ──────────────────── */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sh__t{font-size:.98rem;font-weight:600;margin:0;font-family:var(--fb)}
+.sh__a{font-size:.8rem;color:var(--p);font-weight:500;cursor:pointer}
+.sh__a:hover{text-decoration:underline}
+
+/* ── TIMELINE ────────────────────────── */
+.tl{position:relative}
+.tl::before{content:'';position:absolute;left:8px;top:26px;bottom:10px;
+  width:2px;background:linear-gradient(to bottom,var(--pl),var(--bdr))}
+.en{padding-left:28px;position:relative;margin-bottom:12px}
+.en__dot{position:absolute;left:0;top:17px;width:16px;height:16px;
+  border-radius:50%;background:var(--p);border:3px solid var(--sur);
+  box-shadow:0 0 0 2px var(--pl);transition:transform .18s}
+.en:hover .en__dot{transform:scale(1.3)}
+.en__card{background:var(--card);border-radius:var(--r2);padding:13px 15px;
+  box-shadow:var(--s1);cursor:pointer;transition:transform .17s,box-shadow .17s;
+  border-left:3px solid transparent}
+.en__card:hover{transform:translateX(4px);box-shadow:var(--s2);border-left-color:var(--pl)}
+.en__meta{font-size:.72rem;color:var(--mu);margin-bottom:3px}
+.en__ttl{font-size:.92rem;font-weight:600;color:var(--txt);margin-bottom:5px}
+.en__body{font-size:.81rem;color:var(--mu);line-height:1.5;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.en__tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+
+/* ── TAGS ────────────────────────────── */
+.tag{font-size:.69rem;font-weight:600;padding:2px 10px;border-radius:99px}
+.tag-p{background:var(--tp);color:var(--p)}
+.tag-a{background:var(--ta);color:var(--ac)}
+.tag-t{background:#f7f1d8;color:#7a6b2a}
+
+/* ── CHIPS ───────────────────────────── */
+.chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px}
+.chips::-webkit-scrollbar{height:0}
+.chip{flex-shrink:0;padding:5px 14px;border-radius:99px;font-size:.77rem;
+  font-weight:500;border:1.5px solid var(--bdr);background:var(--card);
+  color:var(--mu);cursor:pointer;transition:all .15s;white-space:nowrap}
+.chip:hover,.chip.on{background:var(--p);color:#fff;border-color:var(--p)}
+
+/* ── FORM ────────────────────────────── */
+.fl{font-size:.81rem;font-weight:600;color:var(--txt);margin-bottom:5px;display:block}
+.fl span{color:var(--ac)}
+.fc{width:100%;background:var(--sur);border:1.5px solid var(--bdr);
+  border-radius:var(--r1);padding:9px 13px;font-size:.86rem;
+  font-family:var(--fb);color:var(--txt);outline:none;
+  transition:border-color .18s,box-shadow .18s}
+.fc:focus{border-color:var(--pl);box-shadow:0 0 0 3px rgba(0,131,143,.15);background:#fff}
+.fc::placeholder{color:var(--mu);opacity:.65}
+textarea.fc{resize:vertical;min-height:100px}
+
+/* ── BUTTONS ─────────────────────────── */
+.btn-p{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:9px 22px;border-radius:99px;font-size:.87rem;font-weight:600;
+  font-family:var(--fb);border:none;cursor:pointer;transition:all .18s;
+  background:var(--p);color:#fff;box-shadow:0 3px 12px rgba(0,96,100,.28)}
+.btn-p:hover{background:var(--pd)}
+.btn-a{background:var(--ac);color:#fff;box-shadow:0 3px 12px rgba(255,112,67,.32)}
+.btn-a:hover{background:var(--ad)}
+.btn-g{background:transparent;color:var(--mu);border:1.5px solid var(--bdr)}
+.btn-g:hover{background:var(--sur);color:var(--txt)}
+.btn-de{background:transparent;color:var(--ac);border:1.5px solid var(--ta)}
+.btn-de:hover{background:var(--ta)}
+.btn-sm{padding:7px 16px;font-size:.81rem}
+
+/* ── PROFILE ─────────────────────────── */
+.ph{background:linear-gradient(135deg,var(--pd),var(--p),var(--pl));
+  border-radius:var(--r3);padding:28px 24px;color:#fff;text-align:center;
+  position:relative;overflow:hidden;margin-bottom:18px}
+.ph::before{content:'';position:absolute;width:180px;height:180px;
+  border-radius:50%;background:rgba(255,255,255,.06);top:-50px;right:-50px}
+.ph__name{font-family:var(--fd);font-size:1.3rem}
+.ph__sub{font-size:.82rem;opacity:.7;margin-top:3px}
+.pstat-v{font-family:var(--fd);font-size:1.35rem;font-weight:700}
+.pstat-l{font-size:.68rem;opacity:.7}
+.si{background:var(--card);border-radius:var(--r2);padding:13px 15px;
+  margin-bottom:9px;display:flex;align-items:center;gap:13px;
+  cursor:pointer;box-shadow:var(--s1);transition:transform .15s,box-shadow .15s;
+  border:none;width:100%;text-align:left}
+.si:hover{transform:translateX(4px);box-shadow:var(--s2)}
+.si-icon{width:38px;height:38px;border-radius:11px;background:var(--sur);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--p);font-size:1.1rem;flex-shrink:0}
+.si-lbl{font-size:.88rem;font-weight:500;flex:1}
+
+/* ── MOOD ────────────────────────────── */
+.mood{width:46px;height:46px;border-radius:13px;border:2px solid var(--bdr);
+  display:flex;align-items:center;justify-content:center;font-size:1.35rem;
+  cursor:pointer;transition:all .15s;background:var(--sur)}
+.mood.on{background:var(--tp);border-color:var(--p);transform:scale(1.15)}
+
+/* ── MODAL ───────────────────────────── */
+.modal-content{border:none;border-radius:var(--r3)!important;overflow:hidden;box-shadow:var(--s3)}
+.mhd{background:var(--p);padding:18px 20px;display:flex;align-items:flex-start;
+  justify-content:space-between;gap:12px}
+.mhd h5{color:#fff;font-family:var(--fd);font-size:1.05rem;line-height:1.3;margin:0}
+
+/* ── TOAST ───────────────────────────── */
+.toast-lb{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(16px);
+  background:var(--pd);color:#fff;padding:11px 22px;border-radius:99px;
+  font-size:.86rem;font-weight:500;box-shadow:var(--s3);z-index:2000;
+  opacity:0;transition:opacity .3s,transform .3s;white-space:nowrap;pointer-events:none}
+.toast-lb.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── PAGES ───────────────────────────── */
+.ps{display:none;animation:fi .22s ease}
+.ps.on{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── RESPONSIVE ──────────────────────── */
+@media(max-width:767.98px){
+  .lb-sb{transform:translateX(-100%);box-shadow:var(--s3)}
+  .lb-sb.on{transform:translateX(0)}
+  .main{margin-left:0;padding-bottom:calc(var(--bnh) + 12px)}
+  .bn{display:flex}
+  .fab{bottom:calc(var(--bnh) + 12px)}
+  .tb__brand{display:flex}
+  .tb__srch{display:none}
+  .pg{padding:14px 13px}
+  .tb{padding:0 13px}
+  .hbg{display:flex!important}
+}
+@media(min-width:768px){
+  .hbg{display:none!important}
+  .fab{bottom:28px;right:28px;width:56px;height:56px}
+}
+</style>
 </head>
 <body>
-    Diário de Bordo
+
+<!-- OVERLAY -->
+<div class="ov" id="ov" onclick="closeSB()"></div>
+
+<!-- ══ SIDEBAR ═══════════════════════════════════════════════ -->
+<aside class="lb-sb" id="sb">
+  <div class="lb-sb__brand">
+    <div class="lb-sb__logo">
+      <svg width="22" height="22" viewBox="0 0 60 60" fill="none">
+        <polygon points="30,4 52,30 30,56 8,30" fill="rgba(255,255,255,.15)"/>
+        <polygon points="30,4 50,30 30,50 10,30" fill="white" opacity=".92"/>
+        <circle cx="30" cy="30" r="8" fill="none" stroke="rgba(0,60,62,.7)" stroke-width="3"/>
+        <circle cx="30" cy="30" r="3" fill="rgba(0,60,62,.7)"/>
+        <line x1="30" y1="4"  x2="30" y2="19" stroke="rgba(0,60,62,.5)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="30" y1="41" x2="30" y2="56" stroke="rgba(0,60,62,.5)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="4"  y1="30" x2="19" y2="30" stroke="rgba(0,60,62,.5)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="41" y1="30" x2="56" y2="30" stroke="rgba(0,60,62,.5)" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <span class="lb-sb__name">logbook</span>
+  </div>
+
+  <nav class="lb-sb__nav">
+    <div class="lb-sb__lbl">Principal</div>
+    <div class="nb on" data-p="home"><i class="bi bi-house-door-fill"></i>Dashboard</div>
+    <div class="nb" data-p="records"><i class="bi bi-journal-text"></i>Registros<span class="dot"></span></div>
+    <div class="nb" data-p="new"><i class="bi bi-plus-circle-fill"></i>Novo Registro</div>
+    <div class="lb-sb__lbl">Conta</div>
+    <div class="nb" data-p="profile"><i class="bi bi-person-circle"></i>Perfil</div>
+    <div class="nb"><i class="bi bi-gear"></i>Configurações</div>
+    <div class="nb" style="color:rgba(255,112,67,.75)"><i class="bi bi-box-arrow-right"></i>Sair</div>
+  </nav>
+
+  <div class="lb-sb__ft">
+    <div class="av">MA</div>
+    <div>
+      <div style="font-size:.84rem;color:#fff;font-weight:600">Maria Alves</div>
+      <div style="font-size:.7rem;color:rgba(255,255,255,.42)">Estudante · Turma 3B</div>
+    </div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ═══════════════════════════════════════════════════ -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <header class="tb">
+    <button class="ib hbg" id="hbg" style="display:none" onclick="toggleSB()">
+      <i class="bi bi-list" style="font-size:1.25rem"></i>
+    </button>
+    <div class="tb__brand" id="mbrand">
+      <svg width="19" height="19" viewBox="0 0 60 60" fill="none">
+        <polygon points="30,4 50,30 30,50 10,30" fill="#006064"/>
+        <circle cx="30" cy="30" r="7" fill="none" stroke="#006064" stroke-width="3"/>
+        <circle cx="30" cy="30" r="3" fill="#006064"/>
+      </svg>logbook
+    </div>
+    <div class="tb__srch">
+      <i class="bi bi-search"></i>
+      <input type="search" placeholder="Buscar registros, matérias…"/>
+    </div>
+    <div class="sp"></div>
+    <button class="ib" title="Notificações"><i class="bi bi-bell-fill"></i><span class="ndot"></span></button>
+    <div class="av" style="cursor:pointer" title="Perfil" onclick="goPage('profile')">MA</div>
+  </header>
+
+  <!-- PAGES -->
+  <main class="pg">
+
+    <!-- ══ HOME ══ -->
+    <section class="ps on" id="page-home">
+      <div class="d-flex align-items-start justify-content-between mb-4">
+        <div>
+          <p class="mb-0" style="font-size:.83rem;color:var(--mu)">Boa tarde 👋</p>
+          <h1 class="sf mb-0" style="font-size:1.55rem;color:var(--p);line-height:1.1">Maria Alves</h1>
+        </div>
+        <div class="text-end" style="font-size:.76rem;color:var(--mu)">
+          <div style="font-weight:600;color:var(--txt)">Seg, 03 Mar</div>
+          <div>2026</div>
+        </div>
+      </div>
+
+      <!-- Streak -->
+      <div class="stk">
+        <div class="stk__lbl">Sequência atual</div>
+        <div class="stk__ttl">Você registrou <strong>4 dias seguidos!</strong> 🔥</div>
+        <div class="stk__trk"><div class="stk__fill" id="sf1" data-w="57"></div></div>
+        <div class="stk__meta">4 de 7 dias — Continue assim!</div>
+      </div>
+
+      <!-- Stats -->
+      <div class="row g-2 mb-4">
+        <div class="col-4"><div class="sc"><div class="sc__v">24</div><div class="sc__l">Registros</div></div></div>
+        <div class="col-4"><div class="sc"><div class="sc__v">4 🔥</div><div class="sc__l">Sequência</div></div></div>
+        <div class="col-4"><div class="sc"><div class="sc__v">6</div><div class="sc__l">Matérias</div></div></div>
+      </div>
+
+      <!-- Recent -->
+      <div class="sh">
+        <h2 class="sh__t">Registros Recentes</h2>
+        <span class="sh__a" onclick="goPage('records')">Ver todos →</span>
+      </div>
+
+      <div class="tl">
+        <div class="en"><div class="en__dot"></div>
+          <div class="en__card" onclick="openModal('Aula de Biologia – Lab','Seg, 10 Mai · 10:30','Mitose e meiose com experimento de microscopia. Realizamos lâminas de cebola e observamos as fases da divisão celular. O professor destacou a coloração com azul de metileno para melhor visualização.',[['#Biologia','p'],['#Prática','a']])">
+            <div class="en__meta">Seg, 10 Mai · 10:30</div>
+            <div class="en__ttl">Aula de Biologia – Lab</div>
+            <div class="en__body">Mitose e meiose com experimento de microscopia. Realizamos lâminas de cebola e observamos as fases da divisão celular.</div>
+            <div class="en__tags"><span class="tag tag-p">#Biologia</span><span class="tag tag-a">#Prática</span></div>
+          </div>
+        </div>
+        <div class="en"><div class="en__dot"></div>
+          <div class="en__card" onclick="openModal('Revisão de Cálculo','Sex, 07 Mai · 14:00','Derivadas e integrais — revisão para a prova. Resolvi 15 exercícios do capítulo 4 do livro do Stewart. Ainda tenho dúvidas em integração por partes, preciso revisar.',[['#Cálculo','p'],['#Revisão','t']])">
+            <div class="en__meta">Sex, 07 Mai · 14:00</div>
+            <div class="en__ttl">Revisão de Cálculo</div>
+            <div class="en__body">Derivadas e integrais — revisão para a prova. Resolvi 15 exercícios do capítulo 4 do livro do Stewart.</div>
+            <div class="en__tags"><span class="tag tag-p">#Cálculo</span><span class="tag tag-t">#Revisão</span></div>
+          </div>
+        </div>
+        <div class="en"><div class="en__dot"></div>
+          <div class="en__card" onclick="openModal('Seminário de História','Qua, 05 Mai · 09:00','Apresentação sobre Revolução Industrial. Recebi nota 9,5 e feedbacks muito positivos da turma e do professor sobre a pesquisa bibliográfica realizada.',[['#História','p'],['#Seminário','a']])">
+            <div class="en__meta">Qua, 05 Mai · 09:00</div>
+            <div class="en__ttl">Seminário de História</div>
+            <div class="en__body">Apresentação sobre Revolução Industrial. Recebi nota 9,5 e feedbacks positivos da turma.</div>
+            <div class="en__tags"><span class="tag tag-p">#História</span><span class="tag tag-a">#Seminário</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ REGISTROS ══ -->
+    <section class="ps" id="page-records">
+      <div class="mb-3">
+        <h1 class="sf mb-1" style="font-size:1.55rem;color:var(--p)">Meus Registros</h1>
+        <p style="font-size:.82rem;color:var(--mu);margin:0">24 entradas encontradas</p>
+      </div>
+      <div class="d-md-none mb-3" style="position:relative">
+        <i class="bi bi-search" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--mu)"></i>
+        <input class="fc" style="border-radius:99px;padding-left:38px" type="search" placeholder="Buscar registros…"/>
+      </div>
+      <div class="chips mb-4">
+        <span class="chip on">Todos</span>
+        <span class="chip">Biologia</span><span class="chip">Cálculo</span>
+        <span class="chip">História</span><span class="chip">Física</span>
+        <span class="chip">Química</span><span class="chip">Português</span>
+      </div>
+      <div class="tl">
+        <div class="en"><div class="en__dot"></div><div class="en__card" onclick="openModal('Aula de Biologia – Lab','Seg, 10 Mai · 10:30','Mitose e meiose com microscopia. Lâminas de cebola e fases da divisão celular observadas.',[['#Biologia','p'],['#Prática','a']])"><div class="en__meta">Seg, 10 Mai · 10:30</div><div class="en__ttl">Aula de Biologia – Lab</div><div class="en__body">Mitose e meiose com experimento de microscopia. Lâminas de cebola.</div><div class="en__tags"><span class="tag tag-p">#Biologia</span><span class="tag tag-a">#Prática</span></div></div></div>
+        <div class="en"><div class="en__dot"></div><div class="en__card" onclick="openModal('Revisão de Cálculo','Sex, 07 Mai · 14:00','Derivadas, integrais, 15 exercícios do cap. 4 Stewart.',[['#Cálculo','p'],['#Revisão','t']])"><div class="en__meta">Sex, 07 Mai · 14:00</div><div class="en__ttl">Revisão de Cálculo</div><div class="en__body">Derivadas e integrais. 15 exercícios do capítulo 4 do Stewart.</div><div class="en__tags"><span class="tag tag-p">#Cálculo</span><span class="tag tag-t">#Revisão</span></div></div></div>
+        <div class="en"><div class="en__dot"></div><div class="en__card" onclick="openModal('Seminário de História','Qua, 05 Mai · 09:00','Revolução Industrial. Nota 9,5 e feedbacks positivos.',[['#História','p'],['#Seminário','a']])"><div class="en__meta">Qua, 05 Mai · 09:00</div><div class="en__ttl">Seminário de História</div><div class="en__body">Apresentação sobre Revolução Industrial. Nota 9,5 e feedbacks positivos.</div><div class="en__tags"><span class="tag tag-p">#História</span><span class="tag tag-a">#Seminário</span></div></div></div>
+        <div class="en"><div class="en__dot"></div><div class="en__card" onclick="openModal('Aula de Física – Eletrostática','Ter, 04 Mai · 11:00','Lei de Coulomb, campo e potencial elétrico. Capacitores.',[['#Física','p']])"><div class="en__meta">Ter, 04 Mai · 11:00</div><div class="en__ttl">Aula de Física – Eletrostática</div><div class="en__body">Lei de Coulomb, campo e potencial elétrico. Exercícios sobre capacitores.</div><div class="en__tags"><span class="tag tag-p">#Física</span></div></div></div>
+        <div class="en"><div class="en__dot"></div><div class="en__card" onclick="openModal('Lab Química Orgânica','Seg, 03 Mai · 08:00','Síntese de éster com ácido acético e álcool. Aroma frutado.',[['#Química','p'],['#Lab','a']])"><div class="en__meta">Seg, 03 Mai · 08:00</div><div class="en__ttl">Lab Química Orgânica</div><div class="en__body">Síntese de éster com ácido acético e álcool. Resultado: aroma frutado característico.</div><div class="en__tags"><span class="tag tag-p">#Química</span><span class="tag tag-a">#Lab</span></div></div></div>
+        <div class="en"><div class="en__dot"></div><div class="en__card" onclick="openModal('Redação — Argumentação','Sex, 30 Abr · 10:00','Estrutura dissertativo-argumentativa. Revisão de coesão e coerência.',[['#Português','p'],['#Escrita','t']])"><div class="en__meta">Sex, 30 Abr · 10:00</div><div class="en__ttl">Redação — Argumentação</div><div class="en__body">Estrutura dissertativo-argumentativa. Revisão de coesão e coerência textual.</div><div class="en__tags"><span class="tag tag-p">#Português</span><span class="tag tag-t">#Escrita</span></div></div></div>
+      </div>
+    </section>
+
+    <!-- ══ NOVO REGISTRO ══ -->
+    <section class="ps" id="page-new">
+      <div class="mb-4">
+        <h1 class="sf mb-1" style="font-size:1.55rem;color:var(--p)">Novo Registro</h1>
+        <p style="font-size:.82rem;color:var(--mu);margin:0">Documente sua aula ou sessão de estudos</p>
+      </div>
+
+      <div id="form-ok" style="display:none" class="mb-3">
+        <div style="background:var(--tp);border-radius:var(--r2);padding:13px 16px;color:var(--p);font-weight:600;font-size:.88rem;display:flex;align-items:center;gap:8px">
+          <i class="bi bi-check-circle-fill" style="font-size:1.1rem"></i> Registro salvo com sucesso!
+        </div>
+      </div>
+
+      <div style="background:var(--card);border-radius:var(--r2);box-shadow:var(--s1);padding:22px 20px">
+        <div class="mb-3">
+          <label class="fl" for="ft">Título <span>*</span></label>
+          <input class="fc" type="text" id="ft" placeholder="Ex: Aula de Biologia – Lab"/>
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col-6">
+            <label class="fl" for="fd">Data</label>
+            <input class="fc" type="date" id="fd"/>
+          </div>
+          <div class="col-6">
+            <label class="fl" for="fh">Horário</label>
+            <input class="fc" type="time" id="fh"/>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="fl" for="fsub">Matéria</label>
+          <select class="fc" id="fsub">
+            <option value="">Selecione a matéria…</option>
+            <option>Biologia</option><option>Cálculo</option><option>História</option>
+            <option>Física</option><option>Química</option><option>Português</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="fl" for="fn">Anotações</label>
+          <textarea class="fc" id="fn" rows="5" placeholder="O que aconteceu? Principais tópicos, dúvidas, insights…"></textarea>
+        </div>
+        <div class="mb-4">
+          <label class="fl" for="ftg">Tags</label>
+          <input class="fc" type="text" id="ftg" placeholder="Prática  Revisão  Lab  Seminário"/>
+          <p style="font-size:.71rem;color:var(--mu);margin-top:4px">Separe as tags com espaço.</p>
+        </div>
+        <!-- Mood -->
+        <div class="mb-4">
+          <label class="fl">Como foi a aula?</label>
+          <div class="d-flex gap-3 flex-wrap">
+            <div class="d-flex flex-column align-items-center gap-1">
+              <div class="mood" data-v="1">😕</div>
+              <span style="font-size:.68rem;color:var(--mu)">Difícil</span>
+            </div>
+            <div class="d-flex flex-column align-items-center gap-1">
+              <div class="mood" data-v="2">😐</div>
+              <span style="font-size:.68rem;color:var(--mu)">Neutro</span>
+            </div>
+            <div class="d-flex flex-column align-items-center gap-1">
+              <div class="mood" data-v="3">🙂</div>
+              <span style="font-size:.68rem;color:var(--mu)">Boa</span>
+            </div>
+            <div class="d-flex flex-column align-items-center gap-1">
+              <div class="mood" data-v="4">😄</div>
+              <span style="font-size:.68rem;color:var(--mu)">Ótima</span>
+            </div>
+            <div class="d-flex flex-column align-items-center gap-1">
+              <div class="mood" data-v="5">🤩</div>
+              <span style="font-size:.68rem;color:var(--mu)">Incrível</span>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex gap-3">
+          <button class="btn-p btn-g flex-fill" onclick="goPage('records')">Cancelar</button>
+          <button class="btn-p btn-a" style="flex:2;justify-content:center" id="sbtn" onclick="saveForm()">
+            <i class="bi bi-check-circle-fill"></i> Salvar Registro
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ PERFIL ══ -->
+    <section class="ps" id="page-profile">
+      <div class="ph">
+        <div class="av av-lg">MA</div>
+        <div class="ph__name">Maria Alves</div>
+        <div class="ph__sub">maria@email.com · Estudante</div>
+        <hr style="border-color:rgba(255,255,255,.2);margin:16px 0"/>
+        <div class="row justify-content-center g-0" style="max-width:260px;margin:0 auto">
+          <div class="col-4 text-center">
+            <div class="pstat-v">24</div>
+            <div class="pstat-l">Registros</div>
+          </div>
+          <div class="col-4 text-center" style="border-left:1px solid rgba(255,255,255,.2);border-right:1px solid rgba(255,255,255,.2)">
+            <div class="pstat-v">4 🔥</div>
+            <div class="pstat-l">Sequência</div>
+          </div>
+          <div class="col-4 text-center">
+            <div class="pstat-v">6</div>
+            <div class="pstat-l">Matérias</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sh mb-3"><h2 class="sh__t">Configurações</h2></div>
+      <button class="si"><div class="si-icon"><i class="bi bi-person-fill"></i></div><span class="si-lbl">Editar Perfil</span><i class="bi bi-chevron-right" style="color:var(--mu)"></i></button>
+      <button class="si"><div class="si-icon"><i class="bi bi-bell-fill"></i></div><span class="si-lbl">Notificações</span><i class="bi bi-chevron-right" style="color:var(--mu)"></i></button>
+      <button class="si"><div class="si-icon"><i class="bi bi-palette-fill"></i></div><span class="si-lbl">Aparência</span><i class="bi bi-chevron-right" style="color:var(--mu)"></i></button>
+      <button class="si"><div class="si-icon"><i class="bi bi-shield-check-fill"></i></div><span class="si-lbl">Privacidade e Segurança</span><i class="bi bi-chevron-right" style="color:var(--mu)"></i></button>
+      <button class="si"><div class="si-icon"><i class="bi bi-download"></i></div><span class="si-lbl">Exportar Dados</span><i class="bi bi-chevron-right" style="color:var(--mu)"></i></button>
+      <button class="si" style="border:1.5px solid var(--ta)">
+        <div class="si-icon" style="background:var(--ta);color:var(--ac)"><i class="bi bi-box-arrow-right"></i></div>
+        <span class="si-lbl" style="color:var(--ac)">Sair da Conta</span>
+        <i class="bi bi-chevron-right" style="color:var(--ac)"></i>
+      </button>
+    </section>
+
+  </main>
+</div><!-- /main -->
+
+<!-- BOTTOM NAV -->
+<nav class="bn d-flex">
+  <div class="bni on" data-p="home"><i class="bi bi-house-door-fill"></i>Home</div>
+  <div class="bni" data-p="records"><i class="bi bi-journal-text"></i>Registros</div>
+  <div class="bni" data-p="new"><i class="bi bi-plus-circle-fill"></i>Novo</div>
+  <div class="bni" data-p="profile"><i class="bi bi-person-circle"></i>Perfil</div>
+</nav>
+
+<!-- FAB -->
+<button class="fab" onclick="goPage('new')" title="Novo Registro">
+  <i class="bi bi-plus-lg"></i>
+</button>
+
+<!-- TOAST -->
+<div class="toast-lb" id="toast"></div>
+
+<!-- ENTRY MODAL -->
+<div class="modal fade" id="em" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:480px">
+    <div class="modal-content">
+      <div class="mhd">
+        <h5 id="em-t"></h5>
+        <button type="button" class="btn-close btn-close-white flex-shrink-0" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <p id="em-d" style="font-size:.76rem;color:var(--mu);margin-bottom:9px"></p>
+        <p id="em-b" style="font-size:.9rem;line-height:1.65;color:var(--txt)"></p>
+        <div id="em-tg" class="d-flex flex-wrap gap-2 mt-3"></div>
+        <hr style="border-color:var(--bdr);margin:16px 0"/>
+        <div class="d-flex gap-2 justify-content-end">
+          <button class="btn-p btn-de btn-sm" data-bs-dismiss="modal"><i class="bi bi-trash3"></i> Excluir</button>
+          <button class="btn-p btn-sm" data-bs-dismiss="modal"><i class="bi bi-pencil-fill"></i> Editar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// SIDEBAR
+const sb=document.getElementById('sb'),ov=document.getElementById('ov');
+function toggleSB(){sb.classList.toggle('on');ov.classList.toggle('on')}
+function closeSB(){sb.classList.remove('on');ov.classList.remove('on')}
+
+// ROUTING
+function goPage(id){
+  document.querySelectorAll('.ps').forEach(s=>s.classList.remove('on'));
+  const el=document.getElementById('page-'+id);
+  if(el){el.classList.add('on');}
+  document.querySelectorAll('.nb[data-p]').forEach(n=>n.classList.remove('on'));
+  const sn=document.querySelector(`.nb[data-p="${id}"]`);
+  if(sn)sn.classList.add('on');
+  document.querySelectorAll('.bni[data-p]').forEach(n=>n.classList.remove('on'));
+  const bn=document.querySelector(`.bni[data-p="${id}"]`);
+  if(bn)bn.classList.add('on');
+  if(window.innerWidth<768)closeSB();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('[data-p]').forEach(el=>{
+  el.addEventListener('click',()=>goPage(el.dataset.p));
+});
+
+// TOAST
+function toast(msg,d=2800){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),d)}
+
+// CHIPS
+document.querySelectorAll('.chips .chip').forEach(c=>{
+  c.addEventListener('click',function(){
+    this.closest('.chips').querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
+    this.classList.add('on');
+  });
+});
+
+// STREAK BARS
+window.addEventListener('load',()=>{
+  setTimeout(()=>{document.querySelectorAll('.stk__fill[data-w]').forEach(b=>{b.style.width=b.dataset.w+'%'})},450);
+});
+
+// ENTRY MODAL
+function openModal(t,d,b,tags){
+  document.getElementById('em-t').textContent=t;
+  document.getElementById('em-d').textContent=d;
+  document.getElementById('em-b').textContent=b;
+  const map={p:'tag-p',a:'tag-a',t:'tag-t'};
+  document.getElementById('em-tg').innerHTML=tags.map(([l,c])=>`<span class="tag ${map[c]||'tag-p'}">${l}</span>`).join('');
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('em')).show();
+}
+
+// MOOD
+document.querySelectorAll('.mood').forEach(m=>{
+  m.addEventListener('click',function(){
+    document.querySelectorAll('.mood').forEach(x=>x.classList.remove('on'));
+    this.classList.add('on');
+  });
+});
+
+// FORM
+function saveForm(){
+  const t=document.getElementById('ft');
+  if(!t.value.trim()){t.focus();t.style.borderColor='var(--ac)';return;}
+  t.style.borderColor='';
+  const btn=document.getElementById('sbtn');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner-border spinner-border-sm me-2"></span>Salvando…';
+  setTimeout(()=>{
+    btn.disabled=false;
+    btn.innerHTML='<i class="bi bi-check-circle-fill"></i> Salvar Registro';
+    document.getElementById('ft').value='';
+    document.getElementById('fn').value='';
+    document.getElementById('ftg').value='';
+    document.getElementById('fsub').value='';
+    document.querySelectorAll('.mood').forEach(m=>m.classList.remove('on'));
+    document.getElementById('form-ok').style.display='block';
+    toast('✅ Registro salvo com sucesso!');
+    setTimeout(()=>{
+      document.getElementById('form-ok').style.display='none';
+      goPage('records');
+    },2000);
+  },1300);
+}
+
+// SET TODAY DATE
+document.getElementById('fd').valueAsDate=new Date();
+</script>
 </body>
 </html>
